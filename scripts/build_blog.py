@@ -24,7 +24,10 @@ ORDERED_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
 BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
 ITALIC_RE = re.compile(r"(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)")
 CODE_RE = re.compile(r"`([^`]+)`")
+IMAGE_RE = re.compile(r"!\[(.+?)\]\((.+?)\)")
 LINK_RE = re.compile(r"\[(.+?)\]\((.+?)\)")
+GITHUB_REPO_RE = re.compile(r"^https?://github\.com/([^/\s?#]+)/([^/\s?#]+)(?:/)?$")
+GITHUB_BULLET_RE = re.compile(r"^\*\*\[(?P<label>.+?)\]\((?P<url>https?://github\.com/[^)]+)\)\*\*(?::\s*(?P<desc>.*))?$")
 
 
 @dataclass
@@ -34,6 +37,7 @@ class Post:
     slug: str
     description: str
     keywords: str = ""
+    preview_image: str = ""
     tags: List[str] = field(default_factory=list)
     body: str = ""
     source: Path = Path()
@@ -67,6 +71,16 @@ BLOG_STYLE = """<style>
   p,li{line-height:1.75;color:var(--muted)}
   .grid{display:grid;grid-template-columns:1.4fr .6fr;gap:16px;margin-top:20px}
   .card{padding:22px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+  .card-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 14px;border:1px solid var(--line);background:#111}
+  .link-card{margin:14px 0}
+  .link-card-inner{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);text-decoration:none;color:inherit;overflow:hidden}
+  .link-card-thumb{width:100%;height:100%;min-height:120px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#111}
+  .link-card-body{display:flex;flex-direction:column;justify-content:center;gap:6px}
+  .link-card-kicker{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:#8f8f8f}
+  .link-card-title{font-family:'Space Grotesk',Inter,sans-serif;font-size:1.05rem;font-weight:700;color:var(--text)}
+  .link-card-desc{color:var(--muted);line-height:1.6}
+  .link-card-url{font-size:.9rem;color:#9f9f9f}
+  @media (max-width:700px){.link-card-inner{grid-template-columns:1fr}.link-card-thumb{min-height:180px}}
   .meta{font-size:.92rem;color:#8f8f8f;margin:.35rem 0 0}
   .tag{display:inline-block;margin:0 .45rem .45rem 0;padding:.4rem .7rem;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:.88rem}
   .post-link{display:inline-flex;align-items:center;gap:.5rem;margin-top:8px;padding:.7rem 1rem;border-radius:12px;background:#fff;color:#000;text-decoration:none;font-weight:600}
@@ -105,23 +119,56 @@ def parse_frontmatter(text: str) -> tuple[Dict[str, str], str]:
     fm_text = parts[0].split("---\n", 1)[1]
     body = parts[1].strip() + "\n"
     data: Dict[str, str] = {}
+    def unquote(value: str) -> str:
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            return value[1:-1]
+        return value
+
     for line in fm_text.splitlines():
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         if ":" not in line:
             continue
         key, value = line.split(":", 1)
-        data[key.strip().lower()] = value.strip()
+        data[key.strip().lower()] = unquote(value)
     return data, body
 
 
 def inline_format(text: str) -> str:
     escaped = html.escape(text)
+    escaped = IMAGE_RE.sub(
+        lambda m: f'<img src="{html.escape(m.group(2), quote=True)}" alt="{html.escape(m.group(1), quote=True)}" style="max-width:100%;height:auto;border-radius:16px;" />',
+        escaped,
+    )
     escaped = LINK_RE.sub(lambda m: f'<a href="{html.escape(m.group(2), quote=True)}">{html.escape(m.group(1))}</a>', escaped)
     escaped = CODE_RE.sub(lambda m: f"<code>{html.escape(m.group(1))}</code>", escaped)
     escaped = BOLD_RE.sub(lambda m: f"<strong>{m.group(1)}</strong>", escaped)
     escaped = ITALIC_RE.sub(lambda m: f"<em>{m.group(1)}</em>", escaped)
     return escaped
+
+
+def github_link_card(label: str, url: str, desc_html: str = "") -> str:
+    match = GITHUB_REPO_RE.match(url.strip())
+    if not match:
+        return ""
+    owner, repo = match.group(1), match.group(2)
+    repo_name = repo.replace("-", " ").replace("_", " ").title()
+    image_url = f"https://opengraph.githubassets.com/1/{owner}/{repo}"
+    desc_html = desc_html.strip() or html.escape(f"GitHub repo • {owner}/{repo}")
+    return f'''
+<div class="link-card github-card">
+  <a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer" class="link-card-inner">
+    <img class="link-card-thumb" src="{html.escape(image_url, quote=True)}" alt="{html.escape(label, quote=True)} preview" />
+    <div class="link-card-body">
+      <div class="link-card-kicker">GitHub</div>
+      <div class="link-card-title">{html.escape(label or repo_name)}</div>
+      <div class="link-card-desc">{desc_html}</div>
+      <div class="link-card-url">github.com/{html.escape(owner)}/{html.escape(repo)}</div>
+    </div>
+  </a>
+</div>'''
+
 
 
 def markdown_to_html(md: str) -> str:
@@ -180,6 +227,17 @@ def markdown_to_html(md: str) -> str:
         bullet = LIST_RE.match(line)
         if bullet:
             flush_paragraph()
+            github_bullet = GITHUB_BULLET_RE.match(bullet.group(1).strip())
+            if github_bullet:
+                close_list()
+                out.append(
+                    github_link_card(
+                        github_bullet.group("label"),
+                        github_bullet.group("url"),
+                        inline_format(github_bullet.group("desc") or ""),
+                    )
+                )
+                continue
             if list_type != "ul":
                 close_list()
                 out.append("<ul>")
@@ -218,8 +276,9 @@ def read_posts(posts_dir: Path) -> List[Post]:
         date_value = fm.get("date") or "1970-01-01"
         description = fm.get("description") or body.split("\n\n", 1)[0].replace("#", "").strip()
         keywords = fm.get("keywords", "")
+        preview_image = fm.get("preview_image", "")
         tags = split_tags(fm.get("tags", ""))
-        posts.append(Post(title=title, date=date_value, slug=slug, description=description, keywords=keywords, tags=tags, body=body, source=path))
+        posts.append(Post(title=title, date=date_value, slug=slug, description=description, keywords=keywords, preview_image=preview_image, tags=tags, body=body, source=path))
     return sorted(posts, key=lambda p: p.sort_key, reverse=True)
 
 
@@ -259,8 +318,10 @@ def render_index(posts: List[Post]) -> str:
     cards: List[str] = []
     for post in posts:
         tags_html = ''.join(f'<span class="tag">{html.escape(tag)}</span>' for tag in post.tags)
+        thumb_html = f'<img class="card-thumb" src="{html.escape(post.preview_image, quote=True)}" alt="{html.escape(post.title, quote=True)}" />' if post.preview_image else ''
         cards.append(f"""
         <article class="card" style="margin-bottom:16px;">
+          {thumb_html}
           <p class="meta">{html.escape(pretty_date(post.date))} • {html.escape(', '.join(post.tags) if post.tags else 'Artikel')}</p>
           <h3 style="margin:0 0 8px; color:var(--text);">{html.escape(post.title)}</h3>
           <p>{html.escape(post.description)}</p>
@@ -329,6 +390,14 @@ def render_post(post: Post) -> str:
     if body_md.startswith(f"# {post.title}"):
         body_md = body_md.split("\n", 1)[1].lstrip("\n")
     body_html = markdown_to_html(body_md)
+    social_meta = ""
+    if post.preview_image:
+        social_meta = (
+            f'<meta property="og:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
+            f'<meta property="og:image:alt" content="{html.escape(post.title)}" />\n  '
+            f'<meta name="twitter:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
+            f'<meta name="twitter:image:alt" content="{html.escape(post.title)}" />\n  '
+        )
     ld = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -342,7 +411,7 @@ def render_post(post: Post) -> str:
         "url": f"{SITE_URL}/blog/{post.slug}/",
     }
     ld_script = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
-    return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_ld=ld_script)}
+    return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_meta=social_meta, extra_ld=ld_script)}
 <body>
   <div class="wrap">
     <div class="nav">
