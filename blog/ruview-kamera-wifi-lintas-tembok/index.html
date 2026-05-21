@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RuView nunjukin gimana sinyal WiFi bisa dipakai buat mendeteksi gerakan manusia tanpa kamera, lengkap dengan sisi keren dan seramnya." />
+  <meta name="robots" content="index,follow" />
+  <meta name="keywords" content="RuView, WiFi DensePose, WiFi CSI, ESP32-S3, open source, invisible sensing, teknologi privasi, AI, hardware" />
+  <link rel="canonical" href="https://wau.my.id/blog/ruview-kamera-wifi-lintas-tembok/" />
+  <meta property="og:site_name" content="Wauputra" />
+  <meta property="og:title" content="Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source | Wauputra" />
+  <meta property="og:description" content="RuView nunjukin gimana sinyal WiFi bisa dipakai buat mendeteksi gerakan manusia tanpa kamera, lengkap dengan sisi keren dan seramnya." />
+  <meta property="og:url" content="https://wau.my.id/blog/ruview-kamera-wifi-lintas-tembok/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source | Wauputra" />
+  <meta name="twitter:description" content="RuView nunjukin gimana sinyal WiFi bisa dipakai buat mendeteksi gerakan manusia tanpa kamera, lengkap dengan sisi keren dan seramnya." />
+  <meta property="og:image" content="https://wau.my.id/assets/blog/ruview-kamera-wifi.png" />
+  <meta property="og:image:alt" content="Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source" />
+  <meta name="twitter:image" content="https://wau.my.id/assets/blog/ruview-kamera-wifi.png" />
+  <meta name="twitter:image:alt" content="Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source" />
+  
+  <style>
+  :root { --bg:#0a0a0a; --panel:rgba(20,20,20,.82); --text:#f8fafc; --muted:#b0b0b0; --line:rgba(255,255,255,.1); }
+  *{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;}
+  body{min-height:100vh} a{color:inherit} .wrap{max-width:960px;margin:0 auto;padding:32px 16px 64px}
+  .nav{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+  .brand{font-family:'Space Grotesk',Inter,sans-serif;font-size:1.4rem;font-weight:700;text-decoration:none}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border-radius:.9rem;text-decoration:none;border:1px solid var(--line);background:#fff;color:#000;font-weight:600}
+  .hero{padding:28px;border-radius:24px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--line);margin-bottom:22px}
+  h1{margin:0 0 12px;font-family:'Space Grotesk',Inter,sans-serif;font-size:clamp(2rem,4vw,3.4rem);line-height:1.05}
+  h2,h3{font-family:'Space Grotesk',Inter,sans-serif}
+  p,li{line-height:1.75;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1.4fr .6fr;gap:16px;margin-top:20px}
+  .card{padding:22px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+  .card-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 14px;border:1px solid var(--line);background:#111}
+  .link-card{margin:14px 0}
+  .link-card-inner{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);text-decoration:none;color:inherit;overflow:hidden}
+  .link-card-thumb{width:100%;height:100%;min-height:120px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#111}
+  .link-card-body{display:flex;flex-direction:column;justify-content:center;gap:6px}
+  .link-card-kicker{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:#8f8f8f}
+  .link-card-title{font-family:'Space Grotesk',Inter,sans-serif;font-size:1.05rem;font-weight:700;color:var(--text)}
+  .link-card-desc{color:var(--muted);line-height:1.6}
+  .link-card-url{font-size:.9rem;color:#9f9f9f}
+  @media (max-width:700px){.link-card-inner{grid-template-columns:1fr}.link-card-thumb{min-height:180px}}
+  .meta{font-size:.92rem;color:#8f8f8f;margin:.35rem 0 0}
+  .tag{display:inline-block;margin:0 .45rem .45rem 0;padding:.4rem .7rem;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:.88rem}
+  .post-link{display:inline-flex;align-items:center;gap:.5rem;margin-top:8px;padding:.7rem 1rem;border-radius:12px;background:#fff;color:#000;text-decoration:none;font-weight:600}
+  .list{display:flex;flex-wrap:wrap;gap:8px}
+  article p:first-child{margin-top:0}
+  article h2{margin-top:1.6rem}
+  article h3{margin-top:1.2rem}
+  article ul, article ol{color:var(--muted)}
+  pre{overflow:auto;padding:16px;border-radius:16px;background:#050505;border:1px solid var(--line)}
+  code{background:rgba(255,255,255,.06);padding:.15rem .35rem;border-radius:.35rem}
+  pre code{background:transparent;padding:0}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+</style>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source", "description": "RuView nunjukin gimana sinyal WiFi bisa dipakai buat mendeteksi gerakan manusia tanpa kamera, lengkap dengan sisi keren dan seramnya.", "datePublished": "2026-05-21", "dateModified": "2026-05-21", "author": {"@type": "Person", "name": "Wauputra"}, "publisher": {"@type": "Person", "name": "Wauputra"}, "mainEntityOfPage": "https://wau.my.id/blog/ruview-kamera-wifi-lintas-tembok/", "url": "https://wau.my.id/blog/ruview-kamera-wifi-lintas-tembok/"}</script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="/blog/">Blog Wauputra</a>
+      <a class="btn" href="/blog/">← Semua Artikel</a>
+    </div>
+
+    <article class="hero">
+      <p class="meta">21 Mei 2026 • Tech, AI, Open Source, Hardware, Opini</p>
+      <h1>Edan, Cuma Modal Sinyal WiFi Bisa Jadi CCTV yang Mantau Lintas Tembok Pakai Teknologi Open Source</h1>
+      <div class="list" style="margin-bottom:12px;"><span class="tag">Tech</span><span class="tag">AI</span><span class="tag">Open Source</span><span class="tag">Hardware</span><span class="tag">Opini</span></div>
+      <p><img src="https://wau.my.id/assets/blog/ruview-kamera-wifi.png" alt="RuView, kamera dari sinyal WiFi" style="max-width:100%;height:auto;border-radius:16px;" /></p>
+<p>Gw baru aja nemu satu project open source yang bikin gw mikir, &quot;Njirlah, kita cepet bener dah, teknologi udah bisa lihat tanpa kamera lagi.&quot; Namanya <strong>RuView</strong>.</p>
+<p>Bayangin lo punya kemampuan buat nge-track gerakan orang di ruangan sebelah, tahu mereka lagi duduk atau berdiri, bahkan sampai tahu detak jantung mereka, tapi lo nggak pakai kamera sama sekali. Lo cuma pakai sinyal WiFi yang udah ada di rumah.</p>
+<p>Nah, di titik itu RuView masuk. Project ini lagi rame banget di GitHub, dan buat gw yang suka ngulik CLI sama hardware, ini beneran <em>gokil sih</em>.</p>
+<h2>Apa Itu RuView?</h2>
+<p>Intinya tuh <strong>WiFi DensePose</strong>. RuView pakai teknologi yang namanya <em>WiFi Channel State Information</em> atau CSI. Jadi, tiap kali sinyal WiFi nembus tembok atau mantul di badan kita, bentuk gelombangnya berubah. RuView ngambil data mentah itu, terus diolah pakai AI buat direkonstruksi jadi kerangka manusia 17 titik atau <em>skeleton</em>.</p>
+<p>Semuanya jalan di hardware murah meriah kayak <strong>ESP32-S3</strong>, yang harganya sekitar 80-100 ribuan.</p>
+<h2>Kenapa Ini Keren Banget? Menurut Gw</h2>
+<p>Ada tiga alasan kenapa RuView ini beda dari yang lain.</p>
+<h3>1. Privacy-First: No Cloud, No Camera</h3>
+<p>Buat lo yang parno sama privasi, ini solusinya. Nggak ada gambar yang dikirim ke cloud. Nggak ada lensa yang bisa di-hack. Semuanya cuma data angka dari sinyal radio yang diproses secara lokal.</p>
+<p>Lo bisa pasang di kamar mandi atau kamar tidur buat deteksi jatuh, misalnya buat lansia, tanpa rasa nggak enak karena ada kamera yang berpotensi ngintip.</p>
+<h3>2. Power of Rust</h3>
+<p>Mesin utamanya dibangun pakai <strong>Rust</strong>. Kenapa? Karena processing sinyal WiFi itu butuh kecepatan tinggi banget. RuView diklaim bisa handle sampai 54.000 frames per detik. Bayangin efisiensinya. Bahkan model AI-nya dikompres pakai <em>4-bit quantization</em> sampai cuma berukuran 8 KB biar bisa lari kenceng di microcontroller sekecil ESP32.</p>
+<h3>3. Vibe Hacker-Zen</h3>
+<p>Documentation-nya punya vibe yang unik. Mereka punya ekosistem yang disebut &quot;Cogs&quot;, modul-modul yang bisa di-hot swap sesuai kebutuhan. Ada modul buat <em>fall-detect</em>, <em>breathing-sync</em>, bahkan ada yang eksperimental kayak <em>ghost-hunter</em>. Seru banget buat dimainin pas weekend.</p>
+<h2>Gimana Cara Mulainya?</h2>
+<p>Kalau lo punya ESP32-S3 nganggur, lo tinggal flash firmware-nya. Mereka udah support Docker dan punya plugin buat <strong>Claude Code</strong>, jadi lo bisa provisioning hardware langsung lewat CLI.</p>
+<p>Buat gw, project kayak gini yang bikin dunia open source tetep menarik. Mereka nggak jualan janji AI yang abstrak, tapi ngasih alat konkret buat kita &quot;ngeliat&quot; dunia yang selama ini nggak kelihatan cuma modal perangkat kecil dan murah.</p>
+<p>Menurut gw, ke depannya kita bakal makin sering nemu teknologi <em>invisible sensing</em> kayak gini. Nggak perlu lagi naruh sensor di mana-mana, cukup manfaatin &quot;kabut&quot; sinyal WiFi yang emang udah nyelimutin rumah kita.</p>
+<p>Tapi satu hal yang menurut gw serem: artinya project kayak gini kalau dibikin skala besar bisa dipakai buat rekam dan mantau aktivitas serumah, se-RT, se-kecamatan, bahkan sekelurahan tanpa CCTV.</p>
+<p>Dan itu bikin pertanyaannya jadi lebih serius: teknologi yang kelihatannya privacy-first di level personal, bisa berubah jadi alat pengawasan kalau dipakai tanpa batas dan tanpa aturan yang jelas.</p>
+    </article>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Artikel lain</h2>
+        <a class="post-link" href="/blog/">Lihat daftar artikel →</a>
+      </section>
+      <aside class="card">
+        <h2>Topik yang sering muncul</h2>
+        <div class="list">
+          <span class="tag">Tech</span><span class="tag">AI</span><span class="tag">Open Source</span><span class="tag">Hardware</span><span class="tag">Opini</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
