@@ -1,14 +1,14 @@
 ---
-title: Ketika AI Mulai Ikut Ngerjain Misteri Matematika
+title: AI Mulai Ngerjain Matematika Murni, Apa Artinya Buat Kita?
 date: 2026-05-26
 slug: ketika-ai-mulai-ikut-ngerjain-misteri-matematika
-description: AI mulai naik kelas dari alat produktivitas jadi partner ilmiah yang ikut membuka jalan baru di matematika murni.
-keywords: AI, OpenAI, Erdős Breakthrough, matematika murni, geometri kombinatorik, teknologi AI
-tags: AI, Tech, Matematika, Opini
+description: OpenAI membahas Erdős Breakthrough, momen saat AI mulai membantu menemukan jalan baru di matematika murni dan membuka peluang baru buat sains.
+keywords: AI matematika murni, OpenAI Erdős Breakthrough, geometri kombinatorik, AI untuk sains, teknologi AI, matematika dan AI
+tags: AI, Tech, Matematika, OpenAI, Opini
 preview_image: https://wau.my.id/assets/og/ketika-ai-mulai-ikut-ngerjain-misteri-matematika.svg
 ---
 
-# Ketika AI Mulai Ikut Ngerjain Misteri Matematika
+# AI Mulai Ngerjain Matematika Murni, Apa Artinya Buat Kita?
 
 Menurut gw, ini salah satu momen penting yang nunjukin kalau AI mulai naik kelas. Bukan cuma buat nulis, bikin gambar, atau bantu coding, tapi mulai masuk ke wilayah yang selama ini dianggap sangat manusiawi: matematika murni.
 
