@@ -33,3 +33,9 @@ Buat gw, bagian paling menarik bukan “AI nyelesain soal matematika”. Yang le
 Dan kalau arah ini berlanjut, sains bisa bergerak jauh lebih cepat dari yang kita bayangkan.
 
 Agak ngeri dengernya, tapi ini bisa jadi harapan baru untuk masalah-masalah pengetahuan di dunia.
+
+## Video penjelasan dari OpenAI
+
+Buat yang mau dengar langsung konteksnya dari tim OpenAI, ini videonya:
+
+https://youtu.be/Br4l9YjCyRU?si=_uBLc_eOQbasqyXm

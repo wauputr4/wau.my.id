@@ -26,6 +26,8 @@ ITALIC_RE = re.compile(r"(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)")
 CODE_RE = re.compile(r"`([^`]+)`")
 IMAGE_RE = re.compile(r"!\[(.+?)\]\((.+?)\)")
 LINK_RE = re.compile(r"\[(.+?)\]\((.+?)\)")
+YOUTUBE_URL_RE = re.compile(r"^https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([A-Za-z0-9_-]{6,})(?:[?&][^\s]*)?$")
+YOUTUBE_LINK_RE = re.compile(r"^\[(.+?)\]\((https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[^)]+)\)$")
 GITHUB_REPO_RE = re.compile(r"^https?://github\.com/([^/\s?#]+)/([^/\s?#]+)(?:/)?$")
 GITHUB_BULLET_RE = re.compile(r"^\*\*\[(?P<label>.+?)\]\((?P<url>https?://github\.com/[^)]+)\)\*\*(?::\s*(?P<desc>.*))?$")
 
@@ -73,6 +75,8 @@ BLOG_STYLE = """<style>
   .card{padding:22px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
   .card-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 14px;border:1px solid var(--line);background:#111}
   .article-cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:20px;margin:0 0 20px;border:1px solid var(--line);background:#111}
+  .youtube-embed{position:relative;width:100%;aspect-ratio:16/9;margin:18px 0 4px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:#111}
+  .youtube-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .link-card{margin:14px 0}
   .link-card-inner{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);text-decoration:none;color:inherit;overflow:hidden}
   .link-card-thumb{width:100%;height:100%;min-height:120px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#111}
@@ -171,6 +175,18 @@ def github_link_card(label: str, url: str, desc_html: str = "") -> str:
 </div>'''
 
 
+def youtube_embed(url: str, title: str = "YouTube video") -> str:
+    match = YOUTUBE_URL_RE.match(url.strip())
+    if not match:
+        return ""
+    video_id = match.group(1)
+    embed_url = f"https://www.youtube-nocookie.com/embed/{video_id}"
+    return f'''
+<div class="youtube-embed">
+  <iframe src="{html.escape(embed_url, quote=True)}" title="{html.escape(title, quote=True)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+</div>'''
+
+
 
 def markdown_to_html(md: str) -> str:
     lines = md.splitlines()
@@ -223,6 +239,20 @@ def markdown_to_html(md: str) -> str:
             level = len(heading.group(1))
             content = inline_format(heading.group(2))
             out.append(f"<h{level}>{content}</h{level}>")
+            continue
+
+        youtube_link = YOUTUBE_LINK_RE.match(line.strip())
+        if youtube_link:
+            flush_paragraph()
+            close_list()
+            out.append(youtube_embed(youtube_link.group(2), youtube_link.group(1)))
+            continue
+
+        youtube_url = YOUTUBE_URL_RE.match(line.strip())
+        if youtube_url:
+            flush_paragraph()
+            close_list()
+            out.append(youtube_embed(line.strip()))
             continue
 
         bullet = LIST_RE.match(line)
