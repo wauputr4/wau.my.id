@@ -179,9 +179,8 @@
               <span class="w-5 h-5">📝</span>
               Latest Write
             </h3>
-            <div id="medium-post" style="color: #d0d0d0;">
-              <p style="color: #808080; font-size: 0.875rem;">Loading latest posts...</p>
-            </div>
+            <p class="text-sm mb-3" style="color: #b0b0b0;">Daftar tulisan terbaru sekarang gw taruh di halaman blog, termasuk tulisan di Medium.</p>
+            <a href="/blog/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium" style="background: #ffffff; color: #000000; text-decoration: none;">Lihat tulisan terbaru <span>→</span></a>
           </div>
         </section>
         
@@ -289,24 +288,6 @@
   </div>
   <script>
     document.getElementById('year-display').textContent = new Date().getFullYear();
-    fetch("https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@wauhashem")
-      .then(res => res.json())
-      .then(data => {
-        if (data.items && data.items.length > 0) {
-          const posts = data.items.slice(0, 3);
-          let html = '';
-          posts.forEach(post => {
-            const pubDate = new Date(post.pubDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
-            html += `<div class="post-card"><h3>${post.title}</h3><p>${pubDate}</p><a href="${post.link}" target="_blank" rel="noopener noreferrer">Baca Selengkapnya →</a></div>`;
-          });
-          document.getElementById("medium-post").innerHTML = html;
-        } else {
-          document.getElementById("medium-post").innerHTML = '<p style="color: #808080; font-size: 0.875rem;">Belum ada post terbaru</p>';
-        }
-      })
-      .catch(() => {
-        document.getElementById("medium-post").innerHTML = '<p style="color: #808080; font-size: 0.875rem;">Belum ada post terbaru</p>';
-      });
   </script>
 </body>
 </html>

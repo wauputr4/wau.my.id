@@ -89,6 +89,11 @@ BLOG_STYLE = """<style>
   .meta{font-size:.92rem;color:#8f8f8f;margin:.35rem 0 0}
   .tag{display:inline-block;margin:0 .45rem .45rem 0;padding:.4rem .7rem;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:.88rem}
   .post-link{display:inline-flex;align-items:center;gap:.5rem;margin-top:8px;padding:.7rem 1rem;border-radius:12px;background:#fff;color:#000;text-decoration:none;font-weight:600}
+  .medium-posts{display:grid;gap:12px;margin-top:12px}
+  .medium-card{display:block;padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);text-decoration:none;color:inherit}
+  .medium-card:hover{background:rgba(255,255,255,.07)}
+  .medium-card h3{font-size:1rem;margin:0 0 6px;color:var(--text)}
+  .medium-card p{font-size:.88rem;margin:0;color:#8f8f8f;line-height:1.5}
   .list{display:flex;flex-wrap:wrap;gap:8px}
   article p:first-child{margin-top:0}
   article h2{margin-top:1.6rem}
@@ -403,14 +408,44 @@ def render_index(posts: List[Post]) -> str:
         {''.join(cards) if cards else '<div class="card"><p>Belum ada artikel.</p></div>'}
       </section>
 
-      <aside class="card">
-        <h2>Topik</h2>
-        <div class="list">
-          {''.join(f'<span class="tag">{t}</span>' for t in tags)}
-        </div>
+      <aside>
+        <section class="card" style="margin-bottom:16px;">
+          <h2>Topik</h2>
+          <div class="list">
+            {''.join(f'<span class="tag">{t}</span>' for t in tags)}
+          </div>
+        </section>
+        <section class="card">
+          <h2>Tulisan di Medium</h2>
+          <p>Beberapa tulisan lama/eksternal gw juga ada di Medium.</p>
+          <div id="medium-posts" class="medium-posts">
+            <p class="meta">Loading tulisan Medium...</p>
+          </div>
+          <a class="post-link" href="https://medium.com/@wauhashem" target="_blank" rel="noopener noreferrer">Buka Medium →</a>
+        </section>
       </aside>
     </div>
   </div>
+  <script>
+    const mediumPostsEl = document.getElementById('medium-posts');
+    if (mediumPostsEl) {{
+      fetch('https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@wauhashem')
+        .then(res => res.json())
+        .then(data => {{
+          if (data.items && data.items.length > 0) {{
+            mediumPostsEl.innerHTML = data.items.slice(0, 3).map(post => {{
+              const pubDate = new Date(post.pubDate).toLocaleDateString('id-ID', {{ year: 'numeric', month: 'short', day: 'numeric' }});
+              return '<a class="medium-card" href="' + post.link + '" target="_blank" rel="noopener noreferrer"><h3>' + post.title + '</h3><p>' + pubDate + ' • Medium</p></a>';
+            }}).join('');
+          }} else {{
+            mediumPostsEl.innerHTML = '<p class="meta">Belum ada tulisan Medium yang kebaca.</p>';
+          }}
+        }})
+        .catch(() => {{
+          mediumPostsEl.innerHTML = '<p class="meta">Tulisan Medium belum bisa dimuat. Pakai tombol Medium di bawah.</p>';
+        }});
+    }}
+  </script>
 </body>
 </html>"""
 
