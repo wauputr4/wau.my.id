@@ -40,6 +40,8 @@ class Post:
     description: str
     keywords: str = ""
     preview_image: str = ""
+    og_image_width: str = ""
+    og_image_height: str = ""
     tags: List[str] = field(default_factory=list)
     body: str = ""
     source: Path = Path()
@@ -313,8 +315,10 @@ def read_posts(posts_dir: Path) -> List[Post]:
         description = fm.get("description") or body.split("\n\n", 1)[0].replace("#", "").strip()
         keywords = fm.get("keywords", "")
         preview_image = fm.get("preview_image", "")
+        og_image_width = fm.get("og_image_width", "")
+        og_image_height = fm.get("og_image_height", "")
         tags = split_tags(fm.get("tags", ""))
-        posts.append(Post(title=title, date=date_value, slug=slug, description=description, keywords=keywords, preview_image=preview_image, tags=tags, body=body, source=path))
+        posts.append(Post(title=title, date=date_value, slug=slug, description=description, keywords=keywords, preview_image=preview_image, og_image_width=og_image_width, og_image_height=og_image_height, tags=tags, body=body, source=path))
     return sorted(posts, key=lambda p: p.sort_key, reverse=True)
 
 
@@ -326,7 +330,7 @@ def pretty_date(date_str: str) -> str:
         return date_str
 
 
-def page_head(title: str, description: str, canonical: str, keywords: str = "", extra_meta: str = "", extra_ld: str = "") -> str:
+def page_head(title: str, description: str, canonical: str, keywords: str = "", extra_meta: str = "", extra_ld: str = "", og_type: str = "website") -> str:
     keywords_meta = f'<meta name="keywords" content="{html.escape(keywords)}" />\n  ' if keywords else ''
     return f"""<!doctype html>
 <html lang="id">
@@ -340,7 +344,7 @@ def page_head(title: str, description: str, canonical: str, keywords: str = "", 
   <meta property="og:title" content="{html.escape(title)}" />
   <meta property="og:description" content="{html.escape(description)}" />
   <meta property="og:url" content="{html.escape(canonical, quote=True)}" />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="{html.escape(og_type)}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{html.escape(title)}" />
   <meta name="twitter:description" content="{html.escape(description)}" />
@@ -462,8 +466,15 @@ def render_post(post: Post) -> str:
     )
     social_meta = ""
     if post.preview_image:
+        image_dimensions_meta = ""
+        if post.og_image_width and post.og_image_height:
+            image_dimensions_meta = (
+                f'<meta property="og:image:width" content="{html.escape(post.og_image_width)}" />\n  '
+                f'<meta property="og:image:height" content="{html.escape(post.og_image_height)}" />\n  '
+            )
         social_meta = (
             f'<meta property="og:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
+            f'{image_dimensions_meta}'
             f'<meta property="og:image:alt" content="{html.escape(post.title)}" />\n  '
             f'<meta name="twitter:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
             f'<meta name="twitter:image:alt" content="{html.escape(post.title)}" />\n  '
@@ -483,7 +494,7 @@ def render_post(post: Post) -> str:
     if post.preview_image:
         ld["image"] = post.preview_image
     ld_script = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
-    return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_meta=social_meta, extra_ld=ld_script)}
+    return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_meta=social_meta, extra_ld=ld_script, og_type='article')}
 <body>
   <div class="wrap">
     <div class="nav">

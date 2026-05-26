@@ -5,7 +5,9 @@ slug: ketika-ai-mulai-ikut-ngerjain-misteri-matematika
 description: OpenAI membahas Erdős Breakthrough, momen saat AI mulai membantu menemukan jalan baru di matematika murni dan membuka peluang baru buat sains.
 keywords: AI matematika murni, OpenAI Erdős Breakthrough, geometri kombinatorik, AI untuk sains, teknologi AI, matematika dan AI
 tags: AI, Tech, Matematika, OpenAI, Opini
-preview_image: https://wau.my.id/assets/og/ketika-ai-mulai-ikut-ngerjain-misteri-matematika.svg
+preview_image: https://wau.my.id/assets/og/ketika-ai-mulai-ikut-ngerjain-misteri-matematika.png
+og_image_width: 1280
+og_image_height: 720
 ---
 
 # AI Mulai Ngerjain Matematika Murni, Apa Artinya Buat Kita?
