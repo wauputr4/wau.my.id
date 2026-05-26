@@ -72,6 +72,7 @@ BLOG_STYLE = """<style>
   .grid{display:grid;grid-template-columns:1.4fr .6fr;gap:16px;margin-top:20px}
   .card{padding:22px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
   .card-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 14px;border:1px solid var(--line);background:#111}
+  .article-cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:20px;margin:0 0 20px;border:1px solid var(--line);background:#111}
   .link-card{margin:14px 0}
   .link-card-inner{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);text-decoration:none;color:inherit;overflow:hidden}
   .link-card-thumb{width:100%;height:100%;min-height:120px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#111}
@@ -390,6 +391,10 @@ def render_post(post: Post) -> str:
     if body_md.startswith(f"# {post.title}"):
         body_md = body_md.split("\n", 1)[1].lstrip("\n")
     body_html = markdown_to_html(body_md)
+    cover_html = (
+        f'<img class="article-cover" src="{html.escape(post.preview_image, quote=True)}" alt="{html.escape(post.title, quote=True)}" />'
+        if post.preview_image else ''
+    )
     social_meta = ""
     if post.preview_image:
         social_meta = (
@@ -410,6 +415,8 @@ def render_post(post: Post) -> str:
         "mainEntityOfPage": f"{SITE_URL}/blog/{post.slug}/",
         "url": f"{SITE_URL}/blog/{post.slug}/",
     }
+    if post.preview_image:
+        ld["image"] = post.preview_image
     ld_script = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
     return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_meta=social_meta, extra_ld=ld_script)}
 <body>
@@ -422,6 +429,7 @@ def render_post(post: Post) -> str:
     <article class="hero">
       <p class="meta">{html.escape(pretty_date(post.date))} • {html.escape(', '.join(post.tags) if post.tags else 'Artikel')}</p>
       <h1>{html.escape(post.title)}</h1>
+      {cover_html}
       <div class="list" style="margin-bottom:12px;">{tags_html}</div>
       {body_html}
     </article>
