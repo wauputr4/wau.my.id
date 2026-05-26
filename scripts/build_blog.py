@@ -460,9 +460,17 @@ def render_post(post: Post) -> str:
     if body_md.startswith(f"# {post.title}"):
         body_md = body_md.split("\n", 1)[1].lstrip("\n")
     body_html = markdown_to_html(body_md)
+    body_uses_preview_image = bool(
+        post.preview_image
+        and (
+            f"]({post.preview_image})" in body_md
+            or f'src="{post.preview_image}"' in body_md
+            or f"src='{post.preview_image}'" in body_md
+        )
+    )
     cover_html = (
         f'<img class="article-cover" src="{html.escape(post.preview_image, quote=True)}" alt="{html.escape(post.title, quote=True)}" />'
-        if post.preview_image else ''
+        if post.preview_image and not body_uses_preview_image else ''
     )
     social_meta = ""
     if post.preview_image:
