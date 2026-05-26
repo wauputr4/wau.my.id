@@ -58,12 +58,13 @@ cd "$repo_root"
 blog_changed=false
 if [[ "$force_build" == true ]]; then
   blog_changed=true
-elif [[ -n "$(git status --porcelain --untracked-files=all -- content/blog scripts/build_blog.py)" ]]; then
+elif [[ -n "$(git status --porcelain --untracked-files=all -- content/blog scripts/build_blog.py scripts/preflight_blog.py assets/blog assets/og)" ]]; then
   blog_changed=true
 fi
 
 if [[ "$blog_changed" == true ]]; then
   python3 scripts/build_blog.py --repo .
+  python3 scripts/preflight_blog.py --repo .
 fi
 
 git add -A
