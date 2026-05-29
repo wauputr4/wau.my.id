@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import shutil
 from dataclasses import dataclass, field
@@ -16,7 +17,36 @@ from xml.dom import minidom
 SITE_URL = "https://wau.my.id"
 SITE_NAME = "Wauputra"
 BLOG_TITLE = "Blog Wauputra"
+DEFAULT_OG_IMAGE = "https://penadigital.tech/_assets/media/11349ebc1bb150a28d1fb97d8b94b05e.jpg"
 MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+
+GA_MEASUREMENT_ID = os.environ.get("GA_MEASUREMENT_ID")
+GSC_VERIFICATION = os.environ.get("GSC_VERIFICATION")
+
+FAVICON_HTML = """
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Wauputra" />
+  <link rel="manifest" href="/site.webmanifest" />
+"""
+
+
+def get_analytics_html() -> str:
+    parts = []
+    if GSC_VERIFICATION:
+        parts.append(f'  <meta name="google-site-verification" content="{html.escape(GSC_VERIFICATION)}" />')
+    if GA_MEASUREMENT_ID:
+        parts.append(f"""  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={html.escape(GA_MEASUREMENT_ID)}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){{dataLayer.push(arguments);}}
+    gtag('js', new Date());
+    gtag('config', '{html.escape(GA_MEASUREMENT_ID)}');
+  </script>""")
+    return "\n".join(parts)
 
 TITLE_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 LIST_RE = re.compile(r"^\s*[-*+]\s+(.*)$")
@@ -332,11 +362,13 @@ def pretty_date(date_str: str) -> str:
 
 def page_head(title: str, description: str, canonical: str, keywords: str = "", extra_meta: str = "", extra_ld: str = "", og_type: str = "website") -> str:
     keywords_meta = f'<meta name="keywords" content="{html.escape(keywords)}" />\n  ' if keywords else ''
+    analytics = get_analytics_html()
     return f"""<!doctype html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{html.escape(title)}</title>
   <meta name="description" content="{html.escape(description)}" />
   <meta name="robots" content="index,follow" />
   {keywords_meta}<link rel="canonical" href="{html.escape(canonical, quote=True)}" />
@@ -348,7 +380,10 @@ def page_head(title: str, description: str, canonical: str, keywords: str = "", 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{html.escape(title)}" />
   <meta name="twitter:description" content="{html.escape(description)}" />
+  <meta name="theme-color" content="#0a0a0a" />
   {extra_meta}
+  {FAVICON_HTML}
+  {analytics}
   {BLOG_STYLE}
   {extra_ld}
 </head>"""
@@ -473,20 +508,23 @@ def render_post(post: Post) -> str:
         if post.preview_image and not body_uses_preview_image else ''
     )
     social_meta = ""
-    if post.preview_image:
-        image_dimensions_meta = ""
-        if post.og_image_width and post.og_image_height:
-            image_dimensions_meta = (
-                f'<meta property="og:image:width" content="{html.escape(post.og_image_width)}" />\n  '
-                f'<meta property="og:image:height" content="{html.escape(post.og_image_height)}" />\n  '
-            )
-        social_meta = (
-            f'<meta property="og:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
-            f'{image_dimensions_meta}'
-            f'<meta property="og:image:alt" content="{html.escape(post.title)}" />\n  '
-            f'<meta name="twitter:image" content="{html.escape(post.preview_image, quote=True)}" />\n  '
-            f'<meta name="twitter:image:alt" content="{html.escape(post.title)}" />\n  '
+    preview_img = post.preview_image if post.preview_image else DEFAULT_OG_IMAGE
+    
+    image_dimensions_meta = ""
+    if post.preview_image and post.og_image_width and post.og_image_height:
+        image_dimensions_meta = (
+            f'<meta property="og:image:width" content="{html.escape(post.og_image_width)}" />\n  '
+            f'<meta property="og:image:height" content="{html.escape(post.og_image_height)}" />\n  '
         )
+    
+    social_meta = (
+        f'<meta property="og:image" content="{html.escape(preview_img, quote=True)}" />\n  '
+        f'{image_dimensions_meta}'
+        f'<meta property="og:image:alt" content="{html.escape(post.title)}" />\n  '
+        f'<meta name="twitter:image" content="{html.escape(preview_img, quote=True)}" />\n  '
+        f'<meta name="twitter:image:alt" content="{html.escape(post.title)}" />\n  '
+    )
+    
     ld = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -494,13 +532,20 @@ def render_post(post: Post) -> str:
         "description": post.description,
         "datePublished": post.date,
         "dateModified": post.date,
-        "author": {"@type": "Person", "name": SITE_NAME},
-        "publisher": {"@type": "Person", "name": SITE_NAME},
+        "author": {
+            "@type": "Person",
+            "name": SITE_NAME,
+            "url": f"{SITE_URL}/blog/tentang-gw/"
+        },
+        "publisher": {
+            "@type": "Person",
+            "name": SITE_NAME,
+            "url": SITE_URL
+        },
         "mainEntityOfPage": f"{SITE_URL}/blog/{post.slug}/",
         "url": f"{SITE_URL}/blog/{post.slug}/",
+        "image": preview_img
     }
-    if post.preview_image:
-        ld["image"] = post.preview_image
     ld_script = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
     return f"""{page_head(f'{post.title} | Wauputra', post.description, f'{SITE_URL}/blog/{post.slug}/', post.keywords, extra_meta=social_meta, extra_ld=ld_script, og_type='article')}
 <body>
@@ -563,6 +608,23 @@ Sitemap: {SITE_URL}/sitemap.xml
 """
 
 
+def update_root_index(repo_root: Path) -> None:
+    index_path = repo_root / "index.html"
+    if not index_path.exists():
+        return
+    content = index_path.read_text(encoding="utf-8")
+    if "/favicon-96x96.png" not in content:
+        content = re.sub(r"\s*</head>", f"\n{FAVICON_HTML}\n</head>", content)
+    analytics = get_analytics_html()
+    if analytics:
+        if "googletagmanager.com" not in content and GA_MEASUREMENT_ID:
+            content = re.sub(r"\s*</head>", f"\n{analytics}\n</head>", content)
+        elif "google-site-verification" not in content and GSC_VERIFICATION:
+            gsc_meta = f'  <meta name="google-site-verification" content="{html.escape(GSC_VERIFICATION)}" />'
+            content = re.sub(r"\s*</head>", f"\n{gsc_meta}\n</head>", content)
+    index_path.write_text(content, encoding="utf-8")
+
+
 def write_site(repo_root: Path, posts: List[Post]) -> None:
     blog_dir = repo_root / "blog"
     blog_dir.mkdir(parents=True, exist_ok=True)
@@ -573,6 +635,7 @@ def write_site(repo_root: Path, posts: List[Post]) -> None:
         (post_dir / "index.html").write_text(render_post(post), encoding="utf-8")
     (repo_root / "robots.txt").write_text(generate_robots(), encoding="utf-8")
     (repo_root / "sitemap.xml").write_text(generate_sitemap(posts), encoding="utf-8")
+    update_root_index(repo_root)
 
 
 def main() -> int:
