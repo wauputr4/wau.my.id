@@ -12,43 +12,57 @@ og_image_height: 630
 
 # AI Agent emang Jago Ngoding, Tapi Jangan Kasih Dia Kunci Arsitektur Sendirian
 
-Ada fase lucu di dunia dev sekarang: tiap minggu ada demo AI agent yang kelihatan makin sakti. Bisa generate modul, refactor repo, bikin test, bahkan jalanin command sendiri. Tapi makin gw lihat, makin kerasa satu hal: masalah besarnya bukan lagi “AI bisa nulis kode atau nggak”. Masalahnya: siapa yang megang arah arsitekturnya?
+Ada fase lucu di dunia dev sekarang: tiap minggu ada demo AI agent yang kelihatannya makin sakti. Bisa generate modul, refactor repo, bikin test, bahkan jalanin command sendiri.
 
-## Agent itu kuat, tapi gampang “Lupa Daratan”
+Tapi makin sering gw lihat demo kayak gitu, makin kerasa satu hal: masalah besarnya sekarang bukan lagi “seberapa kompleks task yang bisa diselesaikan agent?” tapi “siapa yang megang arah arsitekturnya?”
 
-Gw baru baca paper soal *Constraint Decay* di arXiv, dan isinya bikin gw manggut-manggut. Intinya, LLM agent bisa jago bikin sesuatu yang kelihatan jalan, tapi makin berat task-nya, makin besar risiko dia ninggalin constraint awal.
+## Agent itu kuat, tapi gampang lupa daratan
 
-Satu batasan kecil kayak “jangan bypass auth”, “jangan ubah schema publik”, atau “pake Clean Architecture” bisa luntur karena agent terlalu fokus bikin kodenya selesai. Ini bukan karena modelnya bodoh, tapi karena prioritasnya sering condong ke “yang penting jalan” dibanding “tetap rapi secara struktur”.
+Gw baru baca paper soal *Constraint Decay* di arXiv, dan isinya bikin gw manggut-manggut: bener juga.
 
-## Claude bukan arsitek Lo
+Intinya, LLM agent bisa jago bikin sesuatu yang kelihatannya jalan dan aman. Tapi makin berat task-nya, makin besar juga risiko dia ninggalin constraint awal.
 
-Ada hot take yang bilang: “Claude is not your architect.” Gw setuju banget. AI itu kayak junior cepat yang secara default nggak punya memori organisasi, konteks tim, atau intuisi soal trade-off jangka panjang.
+Constraint kecil kayak “jangan bypass auth”, “jangan ubah schema publik”, atau “pake Clean Architecture” bisa pelan-pelan luntur karena agent terlalu fokus menyelesaikan task. Bukan karena modelnya goblok, tapi karena prioritasnya sering condong ke “yang penting jalan dulu” daripada “tetap rapi secara struktur”.
 
-Dia bisa kasih kode yang terlihat efisien, tapi mungkin nabrak pola yang udah tim Lo bangun bertahun-tahun. Solusinya bisa lolos test lokal, tapi belum tentu aman buat migration path, security, rollback, atau biaya operasional.
+Dan ini bahaya, karena di software, hal yang kelihatan kecil di awal sering jadi utang teknis yang paling ngeselin di akhir.
 
-Arsitektur itu bukan cuma kode rapi. Arsitektur itu soal keputusan: apa yang dikorbankan, apa yang dijaga, siapa yang maintenance, dan siapa yang bangun jam 2 pagi kalau production kebakar.
+## Claude bukan arsitek lo
 
-Kalau keputusan itu Lo serahin ke agent tanpa guardrail ketat, Lo cuma nunggu waktu sampai arsitektur Lo jadi “Vibe Architecture”: kelihatan oke pas demo, tapi rapuh pas masuk dunia nyata.
+Ada hot take yang bilang: “Claude is not your architect.” Gw setuju banget.
 
-## Fenomena “Tokenmaxxing” yang bikin dompet kering
+AI itu lebih mirip junior yang pengen cepat bantu. Dia bisa produktif, bisa kasih solusi yang kelihatan efisien, tapi secara default dia nggak punya memori organisasi, konteks tim, atau intuisi soal trade-off jangka panjang.
 
-Yang juga mulai kerasa: workflow agentic itu bisa mahal. Agent itu bukan cuma “chat sekali lalu selesai”. Dia bisa planning, baca file, nulis patch, jalanin test, gagal, retry, lalu ulang dari awal.
+Dia bisa bikin kode yang lolos test lokal, tapi belum tentu aman buat migration path, security, rollback, atau biaya operasional. Bisa juga solusinya nabrak pola yang tim lo bangun bertahun-tahun, cuma karena di konteks chat saat itu polanya nggak cukup jelas.
 
-Dalam skala kecil, ini keren. Dalam skala tim, ini bisa jadi biaya orchestration yang serius kalau semua problem dilempar ke agent tanpa batasan jelas.
+Arsitektur itu bukan sekadar kode rapi. Arsitektur itu soal keputusan: apa yang dikorbankan, apa yang dijaga, siapa yang bakal maintain, dan siapa yang bangun jam 2 pagi kalau production kebakar wkwkwk.
 
-Ada analogi menarik dari sisi hardware: laporan Epoch AI pernah nunjukin memory/HBM bisa jadi porsi terbesar dari biaya komponen AI chip. Buat workflow agent, ini nyambung secara konsep: makin banyak konteks dan makin panjang loop-nya, makin mahal “ingatan” dan koordinasinya.
+Kalau keputusan itu lo serahin ke agent tanpa guardrail ketat, tinggal tunggu waktu sampai arsitektur lo berubah jadi “Vibe Architecture”: kelihatan oke pas demo, tapi rapuh pas beneran dideploy.
 
-Jadi masalahnya bukan cuma “model mana yang paling pinter”, tapi “seberapa disiplin Lo ngasih konteks, batasan, dan review”.
+## Tokenmaxxing bikin dompet ikut mikir
+
+Hal lain yang mulai kerasa: workflow agentic itu bisa mahal banget.
+
+Agent jangan lo bayangin cuma kayak chat biasa yang jawab sekali lalu selesai. Dia bisa planning, baca file, nulis patch, jalanin test, gagal, retry, lalu ulang dari awal. Dalam skala kecil, ini keren. Dalam skala tim, ini bisa jadi biaya orchestration yang serius kalau semua problem dilempar ke agent tanpa batasan jelas.
+
+Ada analogi menarik dari sisi hardware. Laporan Epoch AI pernah nunjukin kalau memory/HBM bisa jadi porsi besar dari biaya komponen AI chip. Di workflow agent, konsepnya mirip: makin banyak konteks yang dibawa, makin panjang loop-nya, makin mahal juga “ingatan” dan koordinasinya.
+
+Jadi problem yang perlu kita pecahin bukan cuma “model mana yang paling pintar”, tapi “seberapa disiplin kita ngasih konteks, batasan, dan review”.
+
+Menurut gw, kemampuan nge-manage agent ini justru jadi skill yang mahal sekarang.
 
 ## Opini gw
 
-Buat gw, *Vibe Coding* itu emang masa depan, tapi *Vibe Architecture* itu bahaya kalau dilepas sendirian.
+Buat gw, *Vibe Coding* bukan masa depan lagi. Itu udah jadi basic skill di era AI.
 
-Skill penting dev sekarang bukan prompting aja, tapi **orchestration with judgment**: tahu kapan delegasi, kapan stop, kapan review, dan kapan bilang: “ini bagian manusia dulu yang mikirin arsitekturnya.”
+Tapi *Vibe Architecture*? Nah, itu bahaya kalau dilepas sendirian.
+
+Skill penting dev sekarang bukan prompting doang, tapi **orchestration with judgment**: tahu kapan delegasi, kapan stop, kapan review, dan kapan bilang, “bagian ini manusia dulu yang mikirin arsitekturnya.”
 
 Delegasi itu perlu. Oversight itu wajib.
 
-Jangan sampai Lo jadi bos yang nggak tahu apa yang dikerjain anak buah digitalnya.
+Jangan sampai kita jadi bos yang nggak ngerti apa yang lagi dikerjain anak buah digital kita sendiri. Jangan terlalu mikro-manage, tapi jangan juga terlalu lepas kendali.
+
+Sederhana, tapi rumit. Ya gitu lah wkwkwk.
 
 ## Referensi
 
