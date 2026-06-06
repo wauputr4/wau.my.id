@@ -5,9 +5,9 @@ slug: ai-agent-library-astrology-financial-market
 description: Eksperimen AI agent mandiri selama sebulan membangun Hermetic Alpha, library untuk menguji pola statistik astrology pada market.
 keywords: Hermetic Alpha, financial astrology, AI agent, Bitcoin astrology, S&P 500 astrology, Gold XAU astrology, astrology market, backtesting astrology
 tags: AI, Crypto, Finance, Astrology, Riset
-preview_image: https://wau.my.id/assets/og/hermetic-alpha-ai-agent-library.png
-og_image_width: 1536
-og_image_height: 1024
+preview_image: https://wau.my.id/assets/og/hermetic-alpha-ai-agent-library-og.png
+og_image_width: 1200
+og_image_height: 630
 ---
 
 # Diluar Dugaan, AI Agent Gua Bikin Library Selama 1 Bulan untuk Nemuin Pola Statistik Astrology pada Financial Market, dan Hasilnya
