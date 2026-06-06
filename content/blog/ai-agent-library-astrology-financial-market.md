@@ -96,9 +96,10 @@ Menurut gua, itu value terbesar dari eksperimen ini. Bukan membuktikan planet me
 
 Dan jujur, ada rasa puas sendiri waktu AI agent yang gua lepas relatif mandiri selama sebulan bukan cuma bikin CRUD atau script biasa, tapi ngebangun alat buat ngetes ide seaneh ini. Gua sebagai owner tidak perlu pegang semua detailnya. Agent yang explore, develop, bikin research artifact, lalu hasilnya bisa gua review belakangan.
 
-Kalau Lo penasaran, Lo bisa coba langsung library-nya di GitHub:
+Kalau Lo penasaran, Lo bisa coba langsung library-nya di GitHub. Skill yang dipakai AI agent buat pattern search-nya juga gua taruh terpisah, jadi workflow-nya bisa dibaca dan dipakai ulang:
 
 - **[Hermetic Alpha Library](https://github.com/wauputr4/hermetic-alpha-library/)**: library open source untuk riset pola statistik astrology pada financial market.
+- **[Financial Astrology Pattern Search Skill](https://www.skills.sh/wauputr4/financial-astrology-skills/financial-astrology-pattern-search)**: skill AI agent untuk nyari, ngetes, dan ngerapihin pola astrology-market secara lebih sistematis.
 
 Di repo itu juga ada research paper dan discussion lengkap buat S&P 500, Bitcoin, dan Gold/XAU. Saran gua, jangan cuma baca angka top 5-nya. Baca juga metodologi, baseline, train/test split, dan bagian limitation-nya, karena justru di situ bagian paling penting dari eksperimen ini.
 
