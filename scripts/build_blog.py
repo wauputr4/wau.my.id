@@ -422,7 +422,13 @@ def render_index(posts: List[Post]) -> str:
         ],
     }
     ld_script = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
-    return f"""{page_head(BLOG_TITLE + ' | Tech, AI, Crypto, dan Catatan Pribadi', 'Blog personal Wauputra berisi tulisan seputar teknologi, AI, crypto, tips and trick, opini teknologi, dan catatan pribadi.', f'{SITE_URL}/blog/', 'blog teknologi, AI, crypto, tips and trick, opini teknologi, blog pribadi Wauputra', extra_ld=ld_script)}
+    blog_social_meta = (
+        f'<meta property="og:image" content="{SITE_URL}/assets/profile/wauputra-profile.png" />\n  '
+        f'<meta property="og:image:alt" content="Blog Wauputra - Wahyu Adi Putra" />\n  '
+        f'<meta name="twitter:image" content="{SITE_URL}/assets/profile/wauputra-profile.png" />\n  '
+        f'<meta name="twitter:image:alt" content="Blog Wauputra - Wahyu Adi Putra" />\n  '
+    )
+    return f"""{page_head(BLOG_TITLE + ' | Tech, AI, Crypto, dan Catatan Pribadi', 'Blog personal Wauputra berisi tulisan seputar teknologi, AI, crypto, tips and trick, opini teknologi, dan catatan pribadi.', f'{SITE_URL}/blog/', 'blog teknologi, AI, crypto, tips and trick, opini teknologi, blog pribadi Wauputra', extra_meta=blog_social_meta, extra_ld=ld_script)}
 <body>
   <div class="wrap">
     <div class="nav">
@@ -449,6 +455,11 @@ def render_index(posts: List[Post]) -> str:
       </section>
 
       <aside>
+        <section class="card" style="margin-bottom:16px;">
+          <h2>Menulis di Kelompok.id</h2>
+          <p>Fokus tulisan terbaru sekarang juga tersedia di Kelompok.id.</p>
+          <a class="post-link" href="https://kelompok.id/p/wauputra" target="_blank" rel="noopener noreferrer">Buka Kelompok.id →</a>
+        </section>
         <section class="card" style="margin-bottom:16px;">
           <h2>Topik</h2>
           <div class="list">
